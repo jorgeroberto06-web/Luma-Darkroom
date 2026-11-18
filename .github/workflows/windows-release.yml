@@ -1,0 +1,46 @@
+name: Build Windows release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Extract Luma project
+        shell: pwsh
+        run: Expand-Archive -LiteralPath "$env:GITHUB_WORKSPACE/Luma-Darkroom-Codex-v1.1.0.zip" -DestinationPath "$env:GITHUB_WORKSPACE/app" -Force
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/Luma-Darkroom-Codex/package-lock.json
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: app/Luma-Darkroom-Codex
+
+      - name: Build and attach Windows installers
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: app/Luma-Darkroom-Codex
+          tagName: ${{ github.event.release.tag_name }}
+          releaseName: ${{ github.event.release.name }}
+          releaseBody: ${{ github.event.release.body }}
+          releaseDraft: false
+          prerelease: false
+          args: --bundles nsis,msi

@@ -3,6 +3,7 @@ name: Build Windows release
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,7 +30,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
         working-directory: app/Luma-Darkroom-Codex
 
       - name: Build and attach Windows installers
@@ -38,9 +39,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: app/Luma-Darkroom-Codex
-          tagName: ${{ github.event.release.tag_name }}
-          releaseName: ${{ github.event.release.name }}
-          releaseBody: ${{ github.event.release.body }}
+          tauriScript: npm run desktop:build
+          tagName: v1.1.0
+          releaseName: Luma Darkroom 1.1.0 — Tríada de color
           releaseDraft: false
           prerelease: false
           args: --bundles nsis,msi

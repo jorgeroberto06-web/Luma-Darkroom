@@ -39,7 +39,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: app/Luma-Darkroom-Codex
-          tauriScript: npm run desktop:build
+          tauriScript: npx tauri
           tagName: v1.1.0
           releaseName: Luma Darkroom 1.1.0 — Tríada de color
           releaseDraft: false
